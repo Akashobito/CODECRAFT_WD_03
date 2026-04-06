@@ -7,17 +7,34 @@ import { AnimatePresence, motion } from "framer-motion";
 let intervalCode;
 
 function App() {
-  const [boxValue, setBoxValue] = useState("x");
-  const [clickCount, setClickCount] = useState([[0,0,0],[0,0,0],[0,0,0]]);
+  const [yourMove, setYourMove] = useState("x");
+  const [aiMove,setAiMove] = useState('o')
+  const [clickCount, setClickCount] = useState([
+    [0, 0, 0],
+    [0, 0, 0],
+    [0, 0, 0],
+  ]);
   const [moveCount, setMoveCount] = useState(0);
   const [isEnd, setIsEnd] = useState(false);
   const [result, setResult] = useState("");
+  const [swap, setSwap] = useState(false);
   const [start, setStart] = useState(true);
   const [array, setArray] = useState([
     ["", "", ""],
     ["", "", ""],
     ["", "", ""],
   ]);
+
+  useEffect(()=>{
+    if(swap){
+      setYourMove('o');
+      setAiMove('x');
+    }else{
+      setYourMove('x')
+      setAiMove('o');
+    }
+  },[swap])
+
 
   useEffect(() => {
     let intervalCode = setTimeout(() => {
@@ -39,18 +56,18 @@ function App() {
 
     setMoveCount((prev) => prev + 1);
 
-    if (boxValue === "x") {
+    if (yourMove === "x") {
       array[first][second] = "x";
       setArray([...array]);
       // xoIcon.classList.add(`fa-${array[first][second]}`);
       // xoIcon.classList.remove("fa-o");
-      setBoxValue("x");
+      // setYourMove("x");
     } else {
       array[first][second] = "o";
       setArray([...array]);
       // xoIcon.classList.remove("fa-x");
       // xoIcon.classList.add("fa-o");
-      setBoxValue("x");
+      // setYourMove("x");
     }
   };
 
@@ -83,13 +100,14 @@ function App() {
     return { first, second };
   };
 
+
   useEffect(() => {
     let intervalCode;
     const findOMove = () => {
       const { first } = handleCPUMove();
       const { second } = handleCPUMove();
       if (array[first][second] != "x" && array[first][second] != "o") {
-        array[first][second] = "o";
+        array[first][second] = aiMove;
         clickCount[first][second] = 1;
         setClickCount([...clickCount]);
         setArray([...array]);
@@ -116,9 +134,13 @@ function App() {
     ];
     setArray(empty);
     setIsEnd(false);
-    setClickCount([[0,0,0],[0,0,0],[0,0,0]]);
+    setClickCount([
+      [0, 0, 0],
+      [0, 0, 0],
+      [0, 0, 0],
+    ]);
     setMoveCount(0);
-    setBoxValue("x");
+    // setYourMove(yourMove)
   };
 
   useEffect(() => {
@@ -127,26 +149,44 @@ function App() {
       const result = checkWin(array, moveCount);
       // console.log(result);
       if (result === "x win") {
-        setClickCount([[0,0,0],[0,0,0],[0,0,0]]);
-        setResult("You Win");
+        setClickCount([
+          [0, 0, 0],
+          [0, 0, 0],
+          [0, 0, 0],
+        ]);
+        if(yourMove === 'x'){
+          setResult("You Win");
+        }else if(yourMove === 'o'){
+          setResult("You Lose");
+        }
         setMoveCount(0);
-        setBoxValue("x");
         intervalCode = setTimeout(() => {
           setIsEnd(true);
         }, 200);
       } else if (result === "o win") {
-        setClickCount([[0,0,0],[0,0,0],[0,0,0]]);
-        setResult("You Loose");
+        setClickCount([
+          [0, 0, 0],
+          [0, 0, 0],
+          [0, 0, 0],
+        ]);
+        if(yourMove === 'o'){
+          setResult("You Win")
+        }else if(yourMove === 'x'){
+          setResult("You Lose");
+        }
         setMoveCount(0);
-        setBoxValue("x");
         intervalCode = setTimeout(() => {
           setIsEnd(true);
         }, 200);
       } else if (result === "draw") {
-        setClickCount([[0,0,0],[0,0,0],[0,0,0]]);
+        setClickCount([
+          [0, 0, 0],
+          [0, 0, 0],
+          [0, 0, 0],
+        ]);
         setResult("Draw");
         setMoveCount(0);
-        setBoxValue("x");
+        setYourMove("x");
         intervalCode = setTimeout(() => {
           setIsEnd(true);
         }, 200);
@@ -204,15 +244,16 @@ function App() {
 
       <AnimatePresence>
         {start && (
-          <motion.div 
-          exit={{
-            opacity: 0,
-            y: 100,
-            transition: {
-              duration: 0.5
-            }
-          }}
-          className="fixed w-full h-[100vh] flex justify-center items-center">
+          <motion.div
+            exit={{
+              opacity: 0,
+              y: 100,
+              transition: {
+                duration: 0.5,
+              },
+            }}
+            className="fixed w-full h-[100vh] flex justify-center items-center"
+          >
             <p className="font-mono text-2xl mt-23 bg-white font-bold px-4 py-1 border-2 rounded-xl">
               Start
             </p>
@@ -226,10 +267,21 @@ function App() {
         </p>
         <div className="flex space-x-10 mb-8">
           <p className="border-2 text-black font-Roboto font-semibold mt-3 px-5 py-1 rounded-sm cursor-pointer">
-            You : <span className="text-red-400">X</span>
+            You : <span className="text-red-400">{swap ? "O" : "X"}</span>
           </p>
+          <div>
+            <motion.i
+              whileTap={{
+                rotate: 180,
+              }}
+              onClick={() => {
+                setSwap(!swap);
+              }}
+              className="cursor-pointer mt-5 text-xl fa-solid fa-arrows-rotate"
+            ></motion.i>
+          </div>
           <p className="border-2 text-black font-Roboto font-semibold mt-3 px-5 py-1 rounded-sm cursor-pointer">
-            AI : <span className="text-green-400">O</span>
+            AI : <span className="text-green-400">{swap ? "X" : "O"}</span>
           </p>
         </div>
         <div className="grid grid-cols-3 w-80 h-70 [&_div]:cursor-pointer [&_div]:border-1 overflow-hidden border-2 rounded-2xl">
@@ -244,7 +296,15 @@ function App() {
             className="box flex justify-center items-center"
           >
             <span className="opacity-0">0</span>
-            <i className={array[0][0]==='x'?"fa-solid text-red-400": "fa-solid text-green-400"  }>{array[0][0]}</i>
+            <i
+              className={
+                array[0][0] === "x"
+                  ? "fa-solid text-red-400"
+                  : "fa-solid text-green-400"
+              }
+            >
+              {array[0][0]}
+            </i>
           </div>
           <div
             onClick={
@@ -257,7 +317,15 @@ function App() {
             className="box flex justify-center items-center"
           >
             <span className="opacity-0">1</span>
-            <i className={array[0][1]==='x'?"fa-solid text-red-400": "fa-solid text-green-400"  }>{array[0][1]}</i>
+            <i
+              className={
+                array[0][1] === "x"
+                  ? "fa-solid text-red-400"
+                  : "fa-solid text-green-400"
+              }
+            >
+              {array[0][1]}
+            </i>
           </div>
           <div
             onClick={
@@ -270,7 +338,15 @@ function App() {
             className="box flex justify-center items-center"
           >
             <span className="opacity-0">2</span>
-            <i className={array[0][2]==='x'?"fa-solid text-red-400": "fa-solid text-green-400"  }>{array[0][2]}</i>
+            <i
+              className={
+                array[0][2] === "x"
+                  ? "fa-solid text-red-400"
+                  : "fa-solid text-green-400"
+              }
+            >
+              {array[0][2]}
+            </i>
           </div>
           <div
             onClick={
@@ -283,7 +359,15 @@ function App() {
             className="box flex justify-center items-center"
           >
             <span className="opacity-0">3</span>
-            <i className={array[1][0]==='x'?"fa-solid text-red-400": "fa-solid text-green-400"  }>{array[1][0]}</i>
+            <i
+              className={
+                array[1][0] === "x"
+                  ? "fa-solid text-red-400"
+                  : "fa-solid text-green-400"
+              }
+            >
+              {array[1][0]}
+            </i>
           </div>
           <div
             onClick={
@@ -296,7 +380,15 @@ function App() {
             className="box flex justify-center items-center"
           >
             <span className="opacity-0">4</span>
-            <i className={array[1][1]==='x'?"fa-solid text-red-400": "fa-solid text-green-400"  }>{array[1][1]}</i>
+            <i
+              className={
+                array[1][1] === "x"
+                  ? "fa-solid text-red-400"
+                  : "fa-solid text-green-400"
+              }
+            >
+              {array[1][1]}
+            </i>
           </div>
           <div
             onClick={
@@ -309,7 +401,15 @@ function App() {
             className="box flex justify-center items-center"
           >
             <span className="opacity-0">5</span>
-            <i className={array[1][2]==='x'?"fa-solid text-red-400": "fa-solid text-green-400"  }>{array[1][2]}</i>
+            <i
+              className={
+                array[1][2] === "x"
+                  ? "fa-solid text-red-400"
+                  : "fa-solid text-green-400"
+              }
+            >
+              {array[1][2]}
+            </i>
           </div>
           <div
             onClick={
@@ -322,7 +422,15 @@ function App() {
             className="box flex justify-center items-center"
           >
             <span className="opacity-0">6</span>
-            <i className={array[2][0]==='x'?"fa-solid text-red-400": "fa-solid text-green-400"  }>{array[2][0]}</i>
+            <i
+              className={
+                array[2][0] === "x"
+                  ? "fa-solid text-red-400"
+                  : "fa-solid text-green-400"
+              }
+            >
+              {array[2][0]}
+            </i>
           </div>
           <div
             onClick={
@@ -335,7 +443,15 @@ function App() {
             className="box flex justify-center items-center"
           >
             <span className="opacity-0">7</span>
-            <i className={array[2][1]==='x'?"fa-solid text-red-400": "fa-solid text-green-400"  }>{array[2][1]}</i>
+            <i
+              className={
+                array[2][1] === "x"
+                  ? "fa-solid text-red-400"
+                  : "fa-solid text-green-400"
+              }
+            >
+              {array[2][1]}
+            </i>
           </div>
 
           <div
@@ -349,7 +465,15 @@ function App() {
             className="box flex justify-center items-center"
           >
             <span className="opacity-0">8</span>
-            <i className={array[2][2]==='x'?"fa-solid text-red-400": "fa-solid text-green-400"  }>{array[2][2]}</i>
+            <i
+              className={
+                array[2][2] === "x"
+                  ? "fa-solid text-red-400"
+                  : "fa-solid text-green-400"
+              }
+            >
+              {array[2][2]}
+            </i>
           </div>
         </div>
         <button
