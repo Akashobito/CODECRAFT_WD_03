@@ -2,25 +2,39 @@ import { useEffect, useRef, useState } from "react";
 import "@fontsource-variable/montserrat/wght.css";
 import "./App.css";
 import { checkWin } from "./logic";
+import { AnimatePresence, motion } from "framer-motion";
+
+let intervalCode;
 
 function App() {
   const [boxValue, setBoxValue] = useState("x");
-  const [clickCount, setClickCount] = useState([0, 0, 0, 0, 0, 0, 0, 0, 0]);
+  const [clickCount, setClickCount] = useState([[0,0,0],[0,0,0],[0,0,0]]);
   const [moveCount, setMoveCount] = useState(0);
   const [isEnd, setIsEnd] = useState(false);
   const [result, setResult] = useState("");
+  const [start, setStart] = useState(true);
   const [array, setArray] = useState([
     ["", "", ""],
     ["", "", ""],
     ["", "", ""],
   ]);
 
+  useEffect(() => {
+    let intervalCode = setTimeout(() => {
+      setStart(false);
+    }, 100);
+
+    return () => {
+      clearInterval(intervalCode);
+    };
+  }, []);
+
   const handleClick = (event, first, second) => {
     // console.log(event.currentTarget)
     // console.log(first,second)
     // const xoIcon = event.currentTarget.lastChild;
-    const index = event.target.innerText;
-    clickCount[index] = 1;
+    // const index = event.target.innerText;
+    clickCount[first][second] = 1;
     setClickCount([...clickCount]);
 
     setMoveCount((prev) => prev + 1);
@@ -30,7 +44,7 @@ function App() {
       setArray([...array]);
       // xoIcon.classList.add(`fa-${array[first][second]}`);
       // xoIcon.classList.remove("fa-o");
-      setBoxValue("o");
+      setBoxValue("x");
     } else {
       array[first][second] = "o";
       setArray([...array]);
@@ -40,49 +54,59 @@ function App() {
     }
   };
 
-  // const handleCPUMove = ()=>{
-  //   const {first} = randomNumbers();
-  //   const {second} = randomNumbers();
+  const handleCPUMove = () => {
+    const { first } = randomNumbers();
+    const { second } = randomNumbers();
 
-  //   function randomNumbers(){
-  //      let first;
-  //      let second;
-  //     const randomNumber1 = Number(Math.random().toFixed(1));
-  //     if(randomNumber1 >0 && randomNumber1 <= 0.3){
-  //       first = 0
-  //     }else if(randomNumber1 >0.3 && randomNumber1 <= 0.6){
-  //       first = 1
-  //     }else{
-  //       first = 2
-  //     }
-    
-  //     const randomNumber2 = Number(Math.random().toFixed(1));
-  //     if(randomNumber2 >0 && randomNumber2 <= 0.3){
-  //       second = 0;
-  //     }else if(randomNumber2 >0.3 && randomNumber2 <= 0.6){
-  //       second = 1;
-  //     }else{
-  //       second = 2;
-  //     }
-  //     return {first,second}
-  //   }
-  //   return {first,second}
-  // } 
-  
-  // useEffect(()=>{
-  //   const findOMove = ()=>{
-  //     const {first} = handleCPUMove();
-  //     const {second} = handleCPUMove();
-  //     if(array[first][second] != 'x'){
-  //       array[first][second] = 'o'
-  //       setArray([...array])
-  //     }else {
-  //       findOMove();
-  //     }
-  //   }
-  //   findOMove();
-  // },[clickCount])
+    function randomNumbers() {
+      let first;
+      let second;
+      const randomNumber1 = Number(Math.random().toFixed(1));
+      if (randomNumber1 > 0 && randomNumber1 <= 0.3) {
+        first = 0;
+      } else if (randomNumber1 > 0.3 && randomNumber1 <= 0.6) {
+        first = 1;
+      } else {
+        first = 2;
+      }
 
+      const randomNumber2 = Number(Math.random().toFixed(1));
+      if (randomNumber2 > 0 && randomNumber2 <= 0.3) {
+        second = 0;
+      } else if (randomNumber2 > 0.3 && randomNumber2 <= 0.6) {
+        second = 1;
+      } else {
+        second = 2;
+      }
+      return { first, second };
+    }
+    return { first, second };
+  };
+
+  useEffect(() => {
+    let intervalCode;
+    const findOMove = () => {
+      const { first } = handleCPUMove();
+      const { second } = handleCPUMove();
+      if (array[first][second] != "x" && array[first][second] != "o") {
+        array[first][second] = "o";
+        clickCount[first][second] = 1;
+        setClickCount([...clickCount]);
+        setArray([...array]);
+      } else {
+        findOMove();
+      }
+    };
+    if (moveCount > 0 && moveCount < 5) {
+      intervalCode = setTimeout(() => {
+        findOMove();
+      }, 300);
+    }
+
+    return () => {
+      clearInterval(intervalCode);
+    };
+  }, [moveCount]);
 
   const handleReset = () => {
     const empty = [
@@ -92,64 +116,126 @@ function App() {
     ];
     setArray(empty);
     setIsEnd(false);
-    setClickCount([0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    setClickCount([[0,0,0],[0,0,0],[0,0,0]]);
     setMoveCount(0);
     setBoxValue("x");
   };
 
   useEffect(() => {
-    if (moveCount > 4) {
+    if (moveCount >= 2) {
+      clearInterval(intervalCode); //to terminate the interval
       const result = checkWin(array, moveCount);
       // console.log(result);
       if (result === "x win") {
-        setClickCount([1, 1, 1, 1, 1, 1, 1, 1, 1]);
+        setClickCount([[0,0,0],[0,0,0],[0,0,0]]);
         setResult("You Win");
-        setIsEnd(true);
         setMoveCount(0);
         setBoxValue("x");
+        intervalCode = setTimeout(() => {
+          setIsEnd(true);
+        }, 200);
       } else if (result === "o win") {
-        setClickCount([1, 1, 1, 1, 1, 1, 1, 1, 1]);
+        setClickCount([[0,0,0],[0,0,0],[0,0,0]]);
         setResult("You Loose");
-        setIsEnd(true);
         setMoveCount(0);
         setBoxValue("x");
+        intervalCode = setTimeout(() => {
+          setIsEnd(true);
+        }, 200);
       } else if (result === "draw") {
-        setClickCount([1, 1, 1, 1, 1, 1, 1, 1, 1]);
+        setClickCount([[0,0,0],[0,0,0],[0,0,0]]);
         setResult("Draw");
-        setIsEnd(true);
         setMoveCount(0);
         setBoxValue("x");
+        intervalCode = setTimeout(() => {
+          setIsEnd(true);
+        }, 200);
       }
     }
-  }, [moveCount]);
+  }, [array]);
 
   return (
     <>
-      {isEnd && (
-        <div className="fixed flex justify-center items-center top-0 left-0 right-0 w-full h-[100vh] backdrop-blur-2xl">
-          <div className="bg-gray-600 w-60 h-50 rounded-2xl text-white flex flex-col justify-center items-center space-y-3 font-Roboto font-semibold tracking-wider">
-            <p className="text-xl">Match Ended!!</p>
-            <p>{result}</p>
-            <button
-              onClick={handleReset}
-              className="bg-orange-300 mt-3 px-5 py-1 rounded-sm cursor-pointer"
+      <AnimatePresence>
+        {isEnd && ( //modal to retry
+          <motion.div
+            initial={{
+              opacity: 0,
+            }}
+            animate={{
+              opacity: 1,
+            }}
+            exit={{
+              opacity: 0,
+            }}
+            className="fixed flex justify-center items-center top-0 left-0 right-0 w-full h-[100vh] backdrop-blur-xs"
+          >
+            <motion.div
+              initial={{
+                y: -600,
+              }}
+              animate={{
+                y: 0,
+                transition: {
+                  duration: 0.5,
+                  type: "spring",
+                },
+              }}
+              exit={{
+                y: -600,
+                transition: {
+                  duration: 0.5,
+                },
+              }}
+              className="bg-gray-600 w-60 h-50 rounded-2xl text-white flex flex-col justify-center items-center space-y-3 font-Roboto font-semibold tracking-wider"
             >
-              Retry
-            </button>
-          </div>
-        </div>
-      )}
+              <p className="text-xl">Match Ended!!</p>
+              <p>{result}</p>
+              <button
+                onClick={handleReset}
+                className="bg-orange-300 text-gray-600 mt-3 px-5 py-1 rounded-sm cursor-pointer"
+              >
+                Retry
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {start && (
+          <motion.div 
+          exit={{
+            opacity: 0,
+            y: 100,
+            transition: {
+              duration: 0.5
+            }
+          }}
+          className="fixed w-full h-[100vh] flex justify-center items-center">
+            <p className="font-mono text-2xl mt-23 bg-white font-bold px-4 py-1 border-2 rounded-xl">
+              Start
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="flex flex-col justify-center items-center w-full h-[100vh]">
-        <p className="text-black font-Roboto text-3xl font-semibold mb-10">TIC-TAC-TOE</p>
+        <p className="text-black font-Roboto text-3xl font-semibold mb-10">
+          TIC-TAC-TOE
+        </p>
         <div className="flex space-x-10 mb-8">
-        <p className="border-2 text-black font-Roboto font-semibold mt-3 px-5 py-1 rounded-sm cursor-pointer">You: X</p>
-        <p className="border-2 text-black font-Roboto font-semibold mt-3 px-5 py-1 rounded-sm cursor-pointer">Appo: O</p>
+          <p className="border-2 text-black font-Roboto font-semibold mt-3 px-5 py-1 rounded-sm cursor-pointer">
+            You : <span className="text-red-400">X</span>
+          </p>
+          <p className="border-2 text-black font-Roboto font-semibold mt-3 px-5 py-1 rounded-sm cursor-pointer">
+            AI : <span className="text-green-400">O</span>
+          </p>
         </div>
-        <div className="grid grid-cols-3 w-80 h-70 [&_div]:cursor-pointer [&_div]:border-1 border-2">
+        <div className="grid grid-cols-3 w-80 h-70 [&_div]:cursor-pointer [&_div]:border-1 overflow-hidden border-2 rounded-2xl">
           <div
             onClick={
-              clickCount[0] < 1
+              clickCount[0][0] < 1
                 ? (event) => {
                     handleClick(event, 0, 0);
                   }
@@ -158,11 +244,11 @@ function App() {
             className="box flex justify-center items-center"
           >
             <span className="opacity-0">0</span>
-            <i className="fa-solid">{array[0][0]}</i>
+            <i className={array[0][0]==='x'?"fa-solid text-red-400": "fa-solid text-green-400"  }>{array[0][0]}</i>
           </div>
           <div
             onClick={
-              clickCount[1] < 1
+              clickCount[0][1] < 1
                 ? (event) => {
                     handleClick(event, 0, 1);
                   }
@@ -171,11 +257,11 @@ function App() {
             className="box flex justify-center items-center"
           >
             <span className="opacity-0">1</span>
-            <i className="fa-solid">{array[0][1]}</i>
+            <i className={array[0][1]==='x'?"fa-solid text-red-400": "fa-solid text-green-400"  }>{array[0][1]}</i>
           </div>
           <div
             onClick={
-              clickCount[2] < 1
+              clickCount[0][2] < 1
                 ? (event) => {
                     handleClick(event, 0, 2);
                   }
@@ -184,11 +270,11 @@ function App() {
             className="box flex justify-center items-center"
           >
             <span className="opacity-0">2</span>
-            <i className="fa-solid">{array[0][2]}</i>
+            <i className={array[0][2]==='x'?"fa-solid text-red-400": "fa-solid text-green-400"  }>{array[0][2]}</i>
           </div>
           <div
             onClick={
-              clickCount[3] < 1
+              clickCount[1][0] < 1
                 ? (event) => {
                     handleClick(event, 1, 0);
                   }
@@ -197,11 +283,11 @@ function App() {
             className="box flex justify-center items-center"
           >
             <span className="opacity-0">3</span>
-            <i className="fa-solid">{array[1][0]}</i>
+            <i className={array[1][0]==='x'?"fa-solid text-red-400": "fa-solid text-green-400"  }>{array[1][0]}</i>
           </div>
           <div
             onClick={
-              clickCount[4] < 1
+              clickCount[1][1] < 1
                 ? (event) => {
                     handleClick(event, 1, 1);
                   }
@@ -210,11 +296,11 @@ function App() {
             className="box flex justify-center items-center"
           >
             <span className="opacity-0">4</span>
-            <i className="fa-solid">{array[1][1]}</i>
+            <i className={array[1][1]==='x'?"fa-solid text-red-400": "fa-solid text-green-400"  }>{array[1][1]}</i>
           </div>
           <div
             onClick={
-              clickCount[5] < 1
+              clickCount[1][2] < 1
                 ? (event) => {
                     handleClick(event, 1, 2);
                   }
@@ -223,11 +309,11 @@ function App() {
             className="box flex justify-center items-center"
           >
             <span className="opacity-0">5</span>
-            <i className="fa-solid">{array[1][2]}</i>
+            <i className={array[1][2]==='x'?"fa-solid text-red-400": "fa-solid text-green-400"  }>{array[1][2]}</i>
           </div>
           <div
             onClick={
-              clickCount[6] < 1
+              clickCount[2][0] < 1
                 ? (event) => {
                     handleClick(event, 2, 0);
                   }
@@ -236,11 +322,11 @@ function App() {
             className="box flex justify-center items-center"
           >
             <span className="opacity-0">6</span>
-            <i className="fa-solid">{array[2][0]}</i>
+            <i className={array[2][0]==='x'?"fa-solid text-red-400": "fa-solid text-green-400"  }>{array[2][0]}</i>
           </div>
           <div
             onClick={
-              clickCount[7] < 1
+              clickCount[2][1] < 1
                 ? (event) => {
                     handleClick(event, 2, 1);
                   }
@@ -249,12 +335,12 @@ function App() {
             className="box flex justify-center items-center"
           >
             <span className="opacity-0">7</span>
-            <i className="fa-solid">{array[2][1]}</i>
+            <i className={array[2][1]==='x'?"fa-solid text-red-400": "fa-solid text-green-400"  }>{array[2][1]}</i>
           </div>
 
           <div
             onClick={
-              clickCount[8] < 1
+              clickCount[2][2] < 1
                 ? (event) => {
                     handleClick(event, 2, 2);
                   }
@@ -263,12 +349,12 @@ function App() {
             className="box flex justify-center items-center"
           >
             <span className="opacity-0">8</span>
-            <i className="fa-solid">{array[2][2]}</i>
+            <i className={array[2][2]==='x'?"fa-solid text-red-400": "fa-solid text-green-400"  }>{array[2][2]}</i>
           </div>
         </div>
         <button
           onClick={handleReset}
-          className="bg-orange-300 text-black font-Roboto font-semibold mt-3 px-5 py-1 rounded-sm cursor-pointer"
+          className="bg-orange-300 text-xl text-black font-Roboto font-semibold mt-5 px-5 py-2 rounded-sm cursor-pointer"
         >
           Reset
         </button>

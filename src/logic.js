@@ -37,7 +37,6 @@ export function checkWin(array,moveCount) {
       }
     }
 
-
   function findWin() {
     for (let i = 0; i < 3; i++) {
       switch (horizontal[i]) {
@@ -66,7 +65,7 @@ export function checkWin(array,moveCount) {
         }
       }
     }
-    return moveCount > 8? "draw": '';
+    return moveCount > 5? "draw": '';
   }
   const result = findWin();
   return result
