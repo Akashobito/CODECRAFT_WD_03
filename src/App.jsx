@@ -267,7 +267,7 @@ function App() {
         </p>
         <div className="flex space-x-10 mb-8">
           <p className="border-2 text-black font-Roboto font-semibold mt-3 px-5 py-1 rounded-sm cursor-pointer">
-            You : <span className="text-red-400">{swap ? "O" : "X"}</span>
+            You : <span className={!swap? "text-red-400": "text-green-500"}>{swap ? "O" : "X"}</span>
           </p>
           <div>
             <motion.i
@@ -281,7 +281,7 @@ function App() {
             ></motion.i>
           </div>
           <p className="border-2 text-black font-Roboto font-semibold mt-3 px-5 py-1 rounded-sm cursor-pointer">
-            AI : <span className="text-green-400">{swap ? "X" : "O"}</span>
+            AI : <span className={swap? "text-red-400": "text-green-500"}>{swap ? "X" : "O"}</span>
           </p>
         </div>
         <div className="grid grid-cols-3 w-80 h-70 [&_div]:cursor-pointer [&_div]:border-1 overflow-hidden border-2 rounded-2xl">
