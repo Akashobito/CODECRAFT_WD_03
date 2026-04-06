@@ -8,7 +8,7 @@ let intervalCode;
 
 function App() {
   const [yourMove, setYourMove] = useState("x");
-  const [aiMove,setAiMove] = useState('o')
+  const [aiMove, setAiMove] = useState("o");
   const [clickCount, setClickCount] = useState([
     [0, 0, 0],
     [0, 0, 0],
@@ -19,22 +19,31 @@ function App() {
   const [result, setResult] = useState("");
   const [swap, setSwap] = useState(false);
   const [start, setStart] = useState(true);
+  const [alert, setAlert] = useState(false);
   const [array, setArray] = useState([
     ["", "", ""],
     ["", "", ""],
     ["", "", ""],
   ]);
 
-  useEffect(()=>{
-    if(swap){
-      setYourMove('o');
-      setAiMove('x');
-    }else{
-      setYourMove('x')
-      setAiMove('o');
-    }
-  },[swap])
+  useEffect(() => {
+    let intervalCode = setTimeout(() => {
+      setAlert(false);
+    }, 1000);
+    return () => {
+      clearInterval(intervalCode);
+    };
+  }, [alert]);
 
+  useEffect(() => {
+    if (swap) {
+      setYourMove("o");
+      setAiMove("x");
+    } else {
+      setYourMove("x");
+      setAiMove("o");
+    }
+  }, [swap]);
 
   useEffect(() => {
     let intervalCode = setTimeout(() => {
@@ -100,7 +109,6 @@ function App() {
     return { first, second };
   };
 
-
   useEffect(() => {
     let intervalCode;
     const findOMove = () => {
@@ -154,9 +162,9 @@ function App() {
           [0, 0, 0],
           [0, 0, 0],
         ]);
-        if(yourMove === 'x'){
+        if (yourMove === "x") {
           setResult("You Win");
-        }else if(yourMove === 'o'){
+        } else if (yourMove === "o") {
           setResult("You Lose");
         }
         setMoveCount(0);
@@ -169,9 +177,9 @@ function App() {
           [0, 0, 0],
           [0, 0, 0],
         ]);
-        if(yourMove === 'o'){
-          setResult("You Win")
-        }else if(yourMove === 'x'){
+        if (yourMove === "o") {
+          setResult("You Win");
+        } else if (yourMove === "x") {
           setResult("You Lose");
         }
         setMoveCount(0);
@@ -261,13 +269,47 @@ function App() {
         )}
       </AnimatePresence>
 
+      <AnimatePresence>
+        {alert && (
+          <motion.div
+            initial={{
+              y: -100,
+              opacity: 0,
+            }}
+            animate={{
+              y: 0,
+              opacity: 1,
+              transition: {
+                duration: 0.5,
+                type: "spring",
+              },
+            }}
+            exit={{
+              y: -100,
+              transition: {
+                duration: 0.5,
+                type: 'spring'
+              }
+            }}
+            className="absolute w-full top-10 flex justify-center items-center"
+          >
+            <p className="font-Roboto shadow-lg inset-shadow-2xs font-semibold px-5 py-2 text-black bg-gray-400 rounded-2xl text-center">
+              You cannot Change it <br></br> right now
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="flex flex-col justify-center items-center w-full h-[100vh]">
         <p className="text-black font-Roboto text-3xl font-semibold mb-10">
           TIC-TAC-TOE
         </p>
         <div className="flex space-x-10 mb-8">
           <p className="border-2 text-black font-Roboto font-semibold mt-3 px-5 py-1 rounded-sm cursor-pointer">
-            You : <span className={!swap? "text-red-400": "text-green-500"}>{swap ? "O" : "X"}</span>
+            You :{" "}
+            <span className={!swap ? "text-red-400" : "text-green-500"}>
+              {swap ? "O" : "X"}
+            </span>
           </p>
           <div>
             <motion.i
@@ -275,13 +317,20 @@ function App() {
                 rotate: 180,
               }}
               onClick={() => {
-                setSwap(!swap);
+                if (moveCount <= 0) {
+                  setSwap(!swap);
+                } else {
+                  setAlert(true);
+                }
               }}
               className="cursor-pointer mt-5 text-xl fa-solid fa-arrows-rotate"
             ></motion.i>
           </div>
           <p className="border-2 text-black font-Roboto font-semibold mt-3 px-5 py-1 rounded-sm cursor-pointer">
-            AI : <span className={swap? "text-red-400": "text-green-500"}>{swap ? "X" : "O"}</span>
+            AI :{" "}
+            <span className={swap ? "text-red-400" : "text-green-500"}>
+              {swap ? "X" : "O"}
+            </span>
           </p>
         </div>
         <div className="grid grid-cols-3 w-80 h-70 [&_div]:cursor-pointer [&_div]:border-1 overflow-hidden border-2 rounded-2xl">
