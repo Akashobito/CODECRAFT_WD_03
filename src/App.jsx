@@ -327,7 +327,7 @@ function App() {
             ></motion.i>
           </div>
           <p className="border-2 text-black font-Roboto font-semibold mt-3 px-5 py-1 rounded-sm cursor-pointer">
-            AI :{" "}
+            PC :{" "}
             <span className={swap ? "text-red-400" : "text-green-500"}>
               {swap ? "X" : "O"}
             </span>
