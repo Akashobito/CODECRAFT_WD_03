@@ -387,7 +387,7 @@ function App() {
         </div>
         <div className="flex space-x-10 mb-8 mt-8">
           <p className="border-2 text-black font-Roboto font-semibold mt-3 px-5 py-1 rounded-sm cursor-pointer">
-           {pvp?  (<i className="fa-solid fa-user mr-4"><span className="ml-0.5 text-lg font-medium font-Roboto">1</span></i>) : (<i className="fa-solid fa-user mr-1"></i>) }
+           {pvp?  (<i className="fa-solid fa-user mr-1"><span className="ml-0.5 text-sm font-medium font-Roboto">1</span></i>) : (<i className="fa-solid fa-user mr-1"></i>) }
             <span className={!swap ? "text-red-400" : "text-green-500"}>
               {swap ? "O" : "X"}
             </span>
@@ -408,7 +408,7 @@ function App() {
             ></motion.i>
           </div>
           <p className="border-2 text-black font-Roboto font-semibold mt-3 px-5 py-1 rounded-sm cursor-pointer">
-            {pvp? (<i className="fa-solid fa-user mr-4 "><span className="ml-0.5 text-lg font-medium font-Roboto text-black">2</span></i>):  <i  className="fa-solid fa-robot ml-2 mr-2"></i> }
+            {pvp? (<i className="fa-solid fa-user mr-4"><span className="ml-0.5 text-sm font-medium font-Roboto text-black">2</span></i>):  <i  className="fa-solid fa-robot ml-2 mr-2"></i> }
             <span className={swap ? "text-red-400" : "text-green-500"}>
               {swap ? "X" : "O"}
             </span>
